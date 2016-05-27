@@ -2,6 +2,7 @@ package com.pzy.controller.front;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -80,8 +81,12 @@ public class PhoneController {
 	@RequestMapping("chat")
 	public String chat(Model model,HttpSession httpSession) {
 		User user=(User)httpSession.getAttribute("user");
-		model.addAttribute("lists1",discussService.findByUserAndType(user,"未回复"));
-		model.addAttribute("lists2",discussService.findByUserAndType(user,"已回复"));
+		List lists1=chatService.findByUserAndState(user,"未回复");
+		List lists2=chatService.findByUserAndState(user,"未回复");
+		model.addAttribute("lists1",lists1);
+		model.addAttribute("count1",lists1.size());
+		model.addAttribute("count2",lists2.size());
+		model.addAttribute("lists2",lists2);
 		return "phone/chat";
 	}
 	@RequestMapping("viewchat")
@@ -176,7 +181,7 @@ public class PhoneController {
 			model.addAttribute("tip","请登陆！");
 			return "phone/login";
 		}
-		chat.setUser(user);
+		chat.setReplyer(user);
 		chat.setCreateDate(new Date());
 		chatService.save(chat);
 		model.addAttribute("tip","回复成功");

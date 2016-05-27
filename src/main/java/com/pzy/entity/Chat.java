@@ -42,8 +42,18 @@ public class Chat {
 	private Date replyDate;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
+	private Patient patient;
+	
+	
+	@ManyToOne(fetch = FetchType.EAGER)
 	private User replyer;
 	
+	public Patient getPatient() {
+		return patient;
+	}
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
 	public String getReply() {
 		return reply;
 	}
