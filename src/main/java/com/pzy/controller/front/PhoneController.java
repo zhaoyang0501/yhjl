@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.pzy.entity.Category;
+import com.pzy.entity.Chat;
 import com.pzy.entity.Discuss;
 import com.pzy.entity.Project;
 import com.pzy.entity.User;
 import com.pzy.service.CategoryService;
+import com.pzy.service.ChatService;
 import com.pzy.service.DiscussService;
 import com.pzy.service.PatientService;
 import com.pzy.service.ProjectService;
@@ -46,6 +48,9 @@ public class PhoneController {
 	
 	@Autowired
 	private PatientService patientService;
+	
+	@Autowired
+	private ChatService chatService;
 	@InitBinder  
 	protected void initBinder(HttpServletRequest request,   ServletRequestDataBinder binder) throws Exception {   
 	    binder.registerCustomEditor(Date.class, new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"), true)); 
@@ -69,10 +74,22 @@ public class PhoneController {
 		User user=(User)httpSession.getAttribute("user");
 		model.addAttribute("lists1",discussService.findByUserAndType(user,"1"));
 		model.addAttribute("lists2",discussService.findByUserAndType(user,"2"));
-		
-		
 		return "phone/discuss";
 	}
+	
+	@RequestMapping("chat")
+	public String chat(Model model,HttpSession httpSession) {
+		User user=(User)httpSession.getAttribute("user");
+		model.addAttribute("lists1",discussService.findByUserAndType(user,"未回复"));
+		model.addAttribute("lists2",discussService.findByUserAndType(user,"已回复"));
+		return "phone/chat";
+	}
+	@RequestMapping("viewchat")
+	public String viewchat(Model model,Long id) {
+		model.addAttribute("bean", chatService.find(id));
+		return "phone/viewchat";
+	}
+	
 	@RequestMapping("patient")
 	public String patient(Model model) {
 		model.addAttribute("lists", patientService.findAll());
@@ -148,6 +165,21 @@ public class PhoneController {
 		discuss.setCreateDate(new Date());
 		discussService.save(discuss);
 		model.addAttribute("tip","评论成功");
+		redirectAttributes.addFlashAttribute("tip", "Successfully added..");
+		return "redirect:/phone/discuss";
+	}
+	
+	@RequestMapping("chatadd")
+	public String chatadd(Model model,Chat chat ,HttpSession httpSession,RedirectAttributes redirectAttributes) {
+		User user=(User)httpSession.getAttribute("user");
+		if(user==null){
+			model.addAttribute("tip","请登陆！");
+			return "phone/login";
+		}
+		chat.setUser(user);
+		chat.setCreateDate(new Date());
+		chatService.save(chat);
+		model.addAttribute("tip","回复成功");
 		redirectAttributes.addFlashAttribute("tip", "Successfully added..");
 		return "redirect:/phone/discuss";
 	}
